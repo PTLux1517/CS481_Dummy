@@ -74,7 +74,7 @@ test('parse valid force data',async () => {
             frames: expect.arrayContaining<ForceFrame>([
                 {
                     time: 0.091667,
-                    forces: expect.arrayContaining<Force|null>([
+                    forces: expect.arrayContaining<Force>([
                         {
                             position: {
                                 x: -1.021202,
