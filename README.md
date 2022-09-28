@@ -4,4 +4,4 @@ BSU CS481 Capstone project
 
 Wireframe Prototype:
 
-![Movilo wireframe](https://drive.google.com/file/d/17jPsTX7J_bDDp0DaTn-C0XWKU70Gkpin/view?usp=sharing)
+<img src="https://drive.google.com/uc?export=view&id=17jPsTX7J_bDDp0DaTn-C0XWKU70Gkpin">
