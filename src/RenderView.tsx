@@ -15,13 +15,13 @@ export default function RenderView(props: Props) {
 
 	const [camera] = useState(() => {
 		const result = new THREE.PerspectiveCamera(70, width / height);
-		result.position.x = 1.35; //+subj_right, -subj_left
-		result.position.y = -0.4; //+subj_front, -subj_back
-		result.position.z = 0.9; //+subj_up, -subj_down
+		result.position.x = 1.35; //+subject's right, -subject's left
+		result.position.y = -0.4; //+subject's front, -subject's back
+		result.position.z = 0.9; //+subject's up, -subject's down
 
 		result.rotation.x = -1.5; //tilt (+down, -up)
-		result.rotation.y = -5.3; //yaw (+CW, -CCW)
-		result.rotation.z = Math.PI; //z emits from cam lens; cam @ 0 is upside-down with respect to data
+		result.rotation.y = 0.9; //yaw (+CW, -CCW)
+		result.rotation.z = Math.PI; //roll (+CCW, -CW) cam @ 0 is upside-down with respect to data
 
 		return result;
 	});
