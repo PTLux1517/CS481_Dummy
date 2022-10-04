@@ -169,12 +169,13 @@ export default function RenderView(props: Props) {
 	useEffect(() => {
 		const camDirVec = new THREE.Vector3();
 		const camDirPerpVec = THREEyAxis.clone(); //will be reassigned by cross product of yAxis and camDirVec
-		const dist = 1;
+		const dist = 1.1;
 		camera.getWorldDirection(camDirVec);
 		camDirPerpVec.cross(camDirVec).normalize(); //gets axis perpendicular to camera's current direction
 		camDirVec.applyAxisAngle(camDirPerpVec,0.5); //put axis helper to the bottom of current camera view
 		camDirVec.multiplyScalar(dist);
 		camDirVec.add(camera.position);
+		camDirVec.add(camDirPerpVec); //put axis helper to the left of current camera view
 		axisHelper.position.set(camDirVec.x, camDirVec.y, camDirVec.z);
 	}, [camPosX,camPosY,camPosZ,camRotX,camRotY,camRotZ,camera,axisHelper]);
 
