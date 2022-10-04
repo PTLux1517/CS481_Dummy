@@ -65,7 +65,7 @@ export default function RenderView(props: Props) {
 		const centerLineColor = 0x220044; //dark purple
 		const gridLineColor = 0x222222; //dark gray
 		return new THREE.GridHelper(totalWidthMeters,cellsAcross,centerLineColor,gridLineColor);
-	}, []); // grid.rotation.x = Math.PI/2;
+	}, []);
 
 	const axisHelper = useMemo(() => {
 		const sizeMeters = 0.1;
@@ -115,31 +115,33 @@ export default function RenderView(props: Props) {
 		const keyPressHandler = (e: KeyboardEvent) => {
 			switch (e.key) {
 				/* Fly left */
-				case "4":
-				case "a":
+				case "a": //for right-handed mouse use
+				case "4": //for left-handed mouse use
 				case "Left": //IE/Edge specific value
-				case "ArrowLeft": cameraControls.moveRight(-moveMeters); break;
+				case "ArrowLeft": cameraControls.moveRight(-moveMeters); break; //ambi/intuitive control
 				/* Fly right */
-				case "6":
-				case "d":
+				case "d": //for right-handed mouse use
+				case "6": //for left-handed mouse use
 				case "Right": //IE/Edge specific value
-				case "ArrowRight": cameraControls.moveRight(moveMeters); break;
+				case "ArrowRight": cameraControls.moveRight(moveMeters); break; //ambi/intuitive control
 				/* Fly forward */
-				case "8":
-				case "w":
+				case "w": //for right-handed mouse use
+				case "8": //for left-handed mouse use
 				case "Up": //IE/Edge specific value
-				case "ArrowUp": cameraControls.moveForward(moveMeters); break;
+				case "ArrowUp": cameraControls.moveForward(moveMeters); break; //ambi/intuitive control
 				/* Fly backward */
-				case "5":
-				case "s":
+				case "s": //for right-handed mouse use
+				case "5": //for left-handed mouse use
 				case "Down": //IE/Edge specific value
-				case "ArrowDown": cameraControls.moveForward(-moveMeters); break;
+				case "ArrowDown": cameraControls.moveForward(-moveMeters); break; //ambi/intuitive control
 				/* Fly down */
-				case "7":
-				case "q": camera.position.y -= moveMeters; break;
+				case "q": //for right-handed mouse use
+				case "7": //for left-handed mouse use
+				case "PageDown": camera.position.y -= moveMeters; break; //ambi/intuitive control
 				/* Fly up */
-				case "9":
-				case "e": camera.position.y += moveMeters; break;
+				case "e": //for right-handed mouse use
+				case "9": //for left-handed mouse use
+				case "PageUp": camera.position.y += moveMeters; break; //ambi/intuitive control
 			}
 			setCamPosX(camera.position.x);
 			setCamPosY(camera.position.y);
@@ -147,10 +149,11 @@ export default function RenderView(props: Props) {
 		};
 		/* Flight controls (mouse) */
 		renderer.domElement.addEventListener('wheel', e => {
+			const scaleFactor = 4;
 			if (e.deltaY > 0)
-				cameraControls.moveForward(-moveMeters*4);
+				cameraControls.moveForward(-moveMeters * scaleFactor);
 			else
-				cameraControls.moveForward(moveMeters*4);
+				cameraControls.moveForward(moveMeters * scaleFactor);
 			setCamPosX(camera.position.x);
 			setCamPosY(camera.position.y);
 			setCamPosZ(camera.position.z);
