@@ -109,38 +109,44 @@ export default function RenderView(props: Props) {
 	useEffect(() => {
 		const moveMeters = 0.05;
 		/* Only allow flight while mouse is in visualization area */
-		renderer.domElement.addEventListener('mouseenter', () => document.addEventListener("keydown",keyPressHandler,false), false);
-		renderer.domElement.addEventListener('mouseleave', () => document.removeEventListener("keydown",keyPressHandler,false), false);
+		const mouseEnterVizAreaHandler = () => document.addEventListener('keydown', keyPressHandler, false);
+		const mouseLeaveVizAreaHandler = () => document.removeEventListener('keydown', keyPressHandler, false);
 		/* Flight controls (keys) */
 		const keyPressHandler = (e: KeyboardEvent) => {
-			switch (e.key) {
+			switch (e.code) {
 				/* Fly left */
-				case "a": //for right-handed mouse use
-				case "4": //for left-handed mouse use
+				case "KeyA": //for right-handed mouse use
+				case "Digit4": //for left-handed mouse use
+				case "Numpad4":
 				case "Left": //IE/Edge specific value
 				case "ArrowLeft": cameraControls.moveRight(-moveMeters); break; //ambi/intuitive control
 				/* Fly right */
-				case "d": //for right-handed mouse use
-				case "6": //for left-handed mouse use
+				case "KeyD": //for right-handed mouse use
+				case "Digit6": //for left-handed mouse use
+				case "Numpad6":
 				case "Right": //IE/Edge specific value
 				case "ArrowRight": cameraControls.moveRight(moveMeters); break; //ambi/intuitive control
 				/* Fly forward */
-				case "w": //for right-handed mouse use
-				case "8": //for left-handed mouse use
+				case "KeyW": //for right-handed mouse use
+				case "Digit8": //for left-handed mouse use
+				case "Numpad8":
 				case "Up": //IE/Edge specific value
 				case "ArrowUp": cameraControls.moveForward(moveMeters); break; //ambi/intuitive control
 				/* Fly backward */
-				case "s": //for right-handed mouse use
-				case "5": //for left-handed mouse use
+				case "KeyS": //for right-handed mouse use
+				case "Digit5": //for left-handed mouse use
+				case "Numpad5":
 				case "Down": //IE/Edge specific value
 				case "ArrowDown": cameraControls.moveForward(-moveMeters); break; //ambi/intuitive control
 				/* Fly down */
-				case "q": //for right-handed mouse use
-				case "7": //for left-handed mouse use
+				case "KeyQ": //for right-handed mouse use
+				case "Digit7": //for left-handed mouse use
+				case "Numpad7":
 				case "PageDown": camera.position.y -= moveMeters; break; //ambi/intuitive control
 				/* Fly up */
-				case "e": //for right-handed mouse use
-				case "9": //for left-handed mouse use
+				case "KeyE": //for right-handed mouse use
+				case "Digit9": //for left-handed mouse use
+				case "Numpad9":
 				case "PageUp": camera.position.y += moveMeters; break; //ambi/intuitive control
 			}
 			setCamPosX(camera.position.x);
@@ -148,7 +154,7 @@ export default function RenderView(props: Props) {
 			setCamPosZ(camera.position.z);
 		};
 		/* Flight controls (mouse) */
-		renderer.domElement.addEventListener('wheel', e => {
+		const mouseWheelHandler = (e: WheelEvent) => {
 			const scaleFactor = 4;
 			if (e.deltaY > 0)
 				cameraControls.moveForward(-moveMeters * scaleFactor);
@@ -157,15 +163,32 @@ export default function RenderView(props: Props) {
 			setCamPosX(camera.position.x);
 			setCamPosY(camera.position.y);
 			setCamPosZ(camera.position.z);
-		}, false);
+		};
 		/* Look controls */
-		renderer.domElement.addEventListener('mousedown', () => cameraControls.lock(), false);
-		renderer.domElement.addEventListener('mouseup', () => {
-			cameraControls.unlock();
-			setCamRotX(camera.rotation.x);
-			setCamRotY(camera.rotation.y);
-			setCamRotZ(camera.rotation.z);
-		}, false);
+		const mouseDownHandler = (e: MouseEvent) => {if (e.button===1) cameraControls.lock();}; //capture mouse movement (to rotate view) while holding middle click
+		const mouseUpHandler = (e: MouseEvent) => { //release mouse after middle click is over
+			if (e.button===1) {
+				cameraControls.unlock();
+				setCamRotX(camera.rotation.x);
+				setCamRotY(camera.rotation.y);
+				setCamRotZ(camera.rotation.z);
+			}
+		};
+		/* Add listeners */
+		renderer.domElement.addEventListener('mouseenter', mouseEnterVizAreaHandler, false);
+		renderer.domElement.addEventListener('mouseleave', mouseLeaveVizAreaHandler, false);
+		renderer.domElement.addEventListener('wheel', mouseWheelHandler, false);
+		renderer.domElement.addEventListener('mousedown', mouseDownHandler, false);
+		renderer.domElement.addEventListener('mouseup', mouseUpHandler, false);
+		/* Clean up old listeners if re-rendering */
+		return () => {
+			document.removeEventListener('keydown', keyPressHandler, false);
+			renderer.domElement.removeEventListener('mouseenter', mouseEnterVizAreaHandler, false);
+			renderer.domElement.removeEventListener('mouseleave', mouseLeaveVizAreaHandler, false);
+			renderer.domElement.removeEventListener('wheel', mouseWheelHandler, false);
+			renderer.domElement.removeEventListener('mousedown', mouseDownHandler, false);
+			renderer.domElement.removeEventListener('mouseup', mouseUpHandler, false);
+		};
 	}, [cameraControls,camera,renderer]);
 
 	/* Position axis helper relative to current camera position/rotation */
