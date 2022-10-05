@@ -131,20 +131,22 @@ async function tsvToTable(file: File): Promise<string[]> {
         return Promise.reject(new Error(
             `unsupported file type\n`+
             `File: ${file.name}\n\n`+
+
             `Provided type ${!file.type ? "unknown" : file.type}, but Movilo requires .tsv, .csv, .txt, or .mot`
         ));
     }
 
     const parseResult: TSV.ParseResult<string> = await new Promise((resolve, reject) => {
         TSV.parse(file, {complete: resolve, error: reject});
-    });
+    }); //auto-detects delimiter; never throws error, result always contains errors property which details problems, like undetectable delimiter
 
     if (parseResult.errors.length!==0) {
         return Promise.reject(new Error(
             `data does not conform to official CSV/TSV standard (see IETF RFC 4180)\n`+
             `File: ${file.name}\n\n`+
+
             `Identified the following errors and their locations in the file:\n`+
-            `${JSON.stringify(parseResult.errors,null,2)}`
+            `${JSON.stringify(parseResult.errors,null,2)}` //gives column and index of error, such as an unmatched quote
         ));
     }
 
@@ -152,9 +154,12 @@ async function tsvToTable(file: File): Promise<string[]> {
         return Promise.reject(new Error(
             `data does not match expected format\n`+
             `File: ${file.name}\n\n`+
+
             `File contents are misaligned with respect to the output format of Vicon Nexus or OpenSim.\n\n`+
+            
             `Expected marker data format example:\n`+
             `https://docs.google.com/spreadsheets/d/14K0VqbQBQEx_8pWsol8vbl4y-JbVtbO4hzpDPxofYtI/edit?usp=sharing\n\n`+
+
             `Expected force data format example:\n`+
             `https://docs.google.com/spreadsheets/d/1hCI3JGnILWrYeuYISfwEFBdMzEsuuWzSdFfUbpwdxsk/edit?usp=sharing`
         ));
