@@ -124,6 +124,8 @@ export default function RenderView(props: Props) {
 	const handleRaycast = useCallback(({
 		clientX, clientY, ctrlKey, shiftKey, currentTarget: {offsetLeft, offsetTop, offsetWidth, offsetHeight}
 	}: React.MouseEvent<HTMLDivElement,MouseEvent>) => {
+		/* Determine type of selection */
+		const multiSelect = ctrlKey || shiftKey;
 		/* Raycaster requires coordinates to be transformed to range [-1,1], with positive y toward top of page (inverted from CSS) */
 		const percentRight = (clientX-offsetLeft)/offsetWidth;
 		const percentDown = (clientY-offsetTop)/offsetHeight;
@@ -135,19 +137,19 @@ export default function RenderView(props: Props) {
 		/* Perform raycast */
 		raycaster.setFromCamera(coords, camera);
 		const hitList = raycaster.intersectObjects(markerMeshes, true);
-		/* Update selected markers list  */
+		/* Update selected markers list with result  */
 		props.setSelectedMarkers.call(undefined, currentList => {
-			/* Miss: remove all markers from selection array (only if not trying to multi-select)  */
-			if (hitList.length===0) return !(ctrlKey||shiftKey) ? [] : currentList;
-			/* Hit: add or remove marker from selection array */
-			else {
+			/* Hit */
+			if (hitList.length>0) {
 				/* Get index (into markerMeshes array) of the intersected marker closest to the camera (hitList[0]) */
 				const hit = hitList[0].object.userData.index as number;
 				/* Multi-select: add or remove single marker from existing selection array */
-				if (ctrlKey||shiftKey) return !currentList.includes(hit) ? [...currentList, hit] : currentList.filter(keep => keep!==hit);
+				if (multiSelect) return !currentList.includes(hit) ? [...currentList,hit] : currentList.filter(keep => keep!==hit);
 				/* Single-select: narrow selection array to the single selected marker */
 				else return [hit];
 			}
+			/* Miss: remove all markers from selection array (only if not trying to multi-select)  */
+			else return !multiSelect ? [] : currentList;
 		});
 	}, [raycaster, markerMeshes, props.setSelectedMarkers, camera]);
 
