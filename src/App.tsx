@@ -119,26 +119,18 @@ export default function App() {
 		/* When playing, before next repaint, increment frame by the correct amount for the elapsed time since last paint */
 		for (interFrameTimeRef.current += elapsedTime; interFrameTimeRef.current > timeStep; interFrameTimeRef.current -= timeStep) {
 			setFrame(current => {
-				if (current+1<=frameCropEnd) return current+1;
-				else if (loopPlayback) return frameCropStart;
-				else {setPlaying(false); return current;}
+				if (current+1<=frameCropEnd) return current+1; //next frame is in range, proceed
+				else if (loopPlayback) return frameCropStart; //not in range: wrap around to start if looping
+				else {setPlaying(false); return current;} //not in range: stop playing on final frame if not looping
 			});
 		}
-		// const framesToIncrement = Math.floor((interFrameTimeRef.current+=elapsedTime)/timeStep);
-		// let resultingFrame = (frameRef.current+framesToIncrement)%frameCropEnd; //wrap around to start if needed
-		// if (resultingFrame<frameRef.current) {
-		// 	resultingFrame = loopPlayback ? resultingFrame+frameCropStart : (()=>{setPlaying(false); return frameCropEnd;})();
-		// }
-		// setFrame(resultingFrame);
-		// interFrameTimeRef.current -= framesToIncrement*timeStep;
-
 		/* Loop forever with tail recursion. Each iteration will recalculate new current marker frame
 		 * once per next available browser repaint (at rate of user's display's refresh rate) */
 		if (playing) {
 			lastTimeRef.current = currentTime; //store time for getting elapsed time in next loop
 			animationRef.current = requestAnimationFrame(animationLoop);
 		}
-	}, [loopPlayback, timeStep, frameCropStart, frameCropEnd, playing]);
+	}, [playing, loopPlayback, timeStep, frameCropStart, frameCropEnd]);
 
 	/* Activate animation loop on play, quasi-deactivate on pause */
 	useEffect(() => {
@@ -149,10 +141,10 @@ export default function App() {
 
 	/* Set end frame from newly-parsed data for animation controls */
 	useEffect(() => {
-		const end = markerFileData.frames.length-2;
-		if (end > 0) {
-			setEnd(end);
-			setCropEnd(end);
+		const lastFrameParsed = markerFileData.frames.length-2;
+		if (lastFrameParsed > 0) {
+			setEnd(lastFrameParsed);
+			setCropEnd(lastFrameParsed);
 		}
 	}, [markerFileData]);
 
@@ -171,7 +163,9 @@ export default function App() {
 	}), [frameRef, frameCropStart, frameCropEnd]);
 
 	/* Play button loop checkbox (on change) */
-	const toggleLooping = useCallback(({target: {checked}}: ChangeEvent<HTMLInputElement>) => setLoopPlayback(checked), []);
+	const toggleLooping = useCallback(({target: {checked}}: ChangeEvent<HTMLInputElement>) => {
+		setLoopPlayback(checked);
+	}, []);
 
 	/* Timeline track thumb (on change) */
 	const timelineTrackSeek = useCallback(({target: {value}}: ChangeEvent<HTMLInputElement>) => {
