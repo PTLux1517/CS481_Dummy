@@ -111,7 +111,8 @@ export default function App() {
 		return markerFileData.frames[1].time * MILLI_PER;
 	}, [markerFileData]);
 
-	const animationLoop = useCallback((currentTime: DOMHighResTimeStamp) => { //called at rate of user's display's refresh rate
+	const animationLoop = useCallback((currentTime: DOMHighResTimeStamp) => {
+		/* If file has not been parsed for the time step, there isn't enough info to know how to animate */
 		if (!timeStep) return;
 		/* When paused, pretend no time has elapsed */
 		const elapsedTime = (lastTimeRef.current!==null) ? currentTime-lastTimeRef.current : 0;
@@ -123,42 +124,28 @@ export default function App() {
 				else {setPlaying(false); return current;}
 			});
 		}
-		/* Store time for getting elapsed time in next loop */
-		lastTimeRef.current = currentTime;
-		/* Loop forever */
-		animationRef.current = requestAnimationFrame(animationLoop);
-	}, [loopPlayback, timeStep, frameCropStart, frameCropEnd]);
+		// const framesToIncrement = Math.floor((interFrameTimeRef.current+=elapsedTime)/timeStep);
+		// let resultingFrame = (frameRef.current+framesToIncrement)%frameCropEnd; //wrap around to start if needed
+		// if (resultingFrame<frameRef.current) {
+		// 	resultingFrame = loopPlayback ? resultingFrame+frameCropStart : (()=>{setPlaying(false); return frameCropEnd;})();
+		// }
+		// setFrame(resultingFrame);
+		// interFrameTimeRef.current -= framesToIncrement*timeStep;
 
-	/* Start animation loop on play */
+		/* Loop forever with tail recursion. Each iteration will recalculate new current marker frame
+		 * once per next available browser repaint (at rate of user's display's refresh rate) */
+		if (playing) {
+			lastTimeRef.current = currentTime; //store time for getting elapsed time in next loop
+			animationRef.current = requestAnimationFrame(animationLoop);
+		}
+	}, [loopPlayback, timeStep, frameCropStart, frameCropEnd, playing]);
+
+	/* Activate animation loop on play, quasi-deactivate on pause */
 	useEffect(() => {
-		if (playing) animationRef.current = requestAnimationFrame(animationLoop); //enter animation loop
+		if (playing) animationRef.current = requestAnimationFrame(animationLoop); //enter new animation loop
 		else lastTimeRef.current = null; //clear time on pause so animation won't skip ahead on next play
-		return () => cancelAnimationFrame(animationRef.current!);
+		return () => cancelAnimationFrame(animationRef.current!); //escape old animation loop callback when play/pause state changes
 	}, [animationLoop, playing]);
-
-	// const animLoop = useCallback(async () => {
-	// 	if (!timeStep) return;
-	// 	if (!playing) lastTimeRef.current = null;
-	// 	const currentTime = performance.now();
-	// 	const elapsedTime = (lastTimeRef.current!==null) ? currentTime-lastTimeRef.current : 0;
-	// 	/* When playing, before next repaint, increment frame by the correct amount for the elapsed time since last paint */
-	// 	for (interFrameTimeRef.current += elapsedTime; interFrameTimeRef.current > timeStep; interFrameTimeRef.current -= timeStep) {
-	// 		setFrame(current => {
-	// 			if (current+1<=frameCropEnd) return current+1;
-	// 			else if (loopPlayback) return frameCropStart;
-	// 			else {setPlaying(false); return current;}
-	// 		});
-	// 	}
-	// 	/* Store time for getting elapsed time in next loop */
-	// 	lastTimeRef.current = currentTime;
-	// 	/* Loop forever at given frame rate */
-	// 	await new Promise(res => setTimeout(() => {animLoop(); return res;}, 1000/60));
-	// 	// return () => cancelAnimationFrame(animationRef.current!);
-	// }, [playing, loopPlayback, timeStep, frameCropStart, frameCropEnd]);
-
-	// useEffect(() => {
-	// 	if (playing) animLoop();
-	// }, [frame, playing, animLoop]);
 
 	/* Set end frame from newly-parsed data for animation controls */
 	useEffect(() => {
@@ -309,15 +296,15 @@ export default function App() {
 						<td><span className={"timeline-cell label"}>Time</span></td>
 						{/* Start time */}
 						<td><input className={"timeline-cell"} type={"number"} disabled
-							value={frameEnd>0 ? markerFileData.frames[frameCropStart].time : 0}
+							value={frameEnd>0 ? markerFileData.frames[frameCropStart]?.time : 0}
 						/></td>
 						{/* Current time */}
 						<td><input className={"timeline-cell"} type={"number"} disabled
-							value={frameEnd>0 ? markerFileData.frames[frame].time : 0}
+							value={frameEnd>0 ? markerFileData.frames[frame]?.time : 0}
 						/></td>
 						{/* End time */}
 						<td><input className={"timeline-cell"} type={"number"} disabled
-							value={frameEnd>0 ? markerFileData.frames[frameCropEnd].time : 0}
+							value={frameEnd>0 ? markerFileData.frames[frameCropEnd]?.time : 0}
 						/></td>
 					</tr>
 					<tr>

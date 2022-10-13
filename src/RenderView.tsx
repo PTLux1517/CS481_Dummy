@@ -373,6 +373,7 @@ export default function RenderView(props: Props) {
 		root.current!.appendChild(renderer.domElement);
 	}, [renderer/*, animationLoop*/]);
 
+	/* Only re-render the scene when its visual arrangement changes (new frame, file, camera orientation, or selections) */
 	useEffect(() => {
 		requestAnimationFrame(() => renderer.render(scene,camera));
 	}, [props.frame, props.markerData, props.forceData, props.selectedMarkers, camPosX, camPosY, camPosZ, camRotX, camRotY, camRotZ, renderer, scene, camera]);
