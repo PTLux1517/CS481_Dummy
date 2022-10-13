@@ -20,14 +20,14 @@ const MARKER_COLOR_SELECTED = new THREE.Color("yellow");
 
 const renderWidth = 800;
 const renderHeight = 450;
-const fps = 60;
+// const fps = 60;
 
 interface Props {
 	frame: number;
 	markerData: MarkerFileData;
 	forceData: ForceFileData;
 	selectedMarkers: number[];
-	updateSelectedMarkers(param: number[] | ((current: number[]) => number[])): void;
+	setSelectedMarkers( param: number[] | ((current: number[]) => number[]) ): void;
 }
 
 
@@ -134,30 +134,22 @@ export default function RenderView(props: Props) {
 		};
 		/* Perform raycast */
 		raycaster.setFromCamera(coords, camera);
-		console.log(JSON.stringify(coords));
 		const hitList = raycaster.intersectObjects(markerMeshes, true);
-		/* Miss: remove all markers from selection array (only if not trying to multi-select)  */
-		if (hitList.length===0) {
-			if (!(ctrlKey||shiftKey))
-				props.updateSelectedMarkers.call(undefined, []); //set selectedMarkers to empty array
-		}
-		/* Hit: add or remove marker from selection array */
-		else {
-			/* Get index (into markerMeshes array) of the intersected marker closest to the camera (hitList[0]) */
-			const hit = hitList[0].object.userData.index as number;
-			/* Multi-select: add or remove single marker from existing selection array */
-			if (ctrlKey||shiftKey) {
-				props.updateSelectedMarkers.call(undefined, current => { //current is the existing selection array
-					if (!current.includes(hit)) return [...current, hit]; //new marker: add to list
-					return current.filter(x => x!==hit); //already selected marker: remove from list
-				});
-			}
-			/* Single-select: narrow selection array to the single selected marker */
+		/* Update selected markers list  */
+		props.setSelectedMarkers.call(undefined, currentList => {
+			/* Miss: remove all markers from selection array (only if not trying to multi-select)  */
+			if (hitList.length===0) return !(ctrlKey||shiftKey) ? [] : currentList;
+			/* Hit: add or remove marker from selection array */
 			else {
-				props.updateSelectedMarkers.call(undefined, [hit]); //replace selection array
+				/* Get index (into markerMeshes array) of the intersected marker closest to the camera (hitList[0]) */
+				const hit = hitList[0].object.userData.index as number;
+				/* Multi-select: add or remove single marker from existing selection array */
+				if (ctrlKey||shiftKey) return !currentList.includes(hit) ? [...currentList, hit] : currentList.filter(keep => keep!==hit);
+				/* Single-select: narrow selection array to the single selected marker */
+				else return [hit];
 			}
-		}
-	}, [raycaster, markerMeshes, props.updateSelectedMarkers, camera]);
+		});
+	}, [raycaster, markerMeshes, props.setSelectedMarkers, camera]);
 
 	/* Position 3D marker meshes for the given frame (in props) */
 	useEffect(() => {

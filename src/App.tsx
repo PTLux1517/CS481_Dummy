@@ -244,7 +244,7 @@ export default function App() {
 			{/* ---------------------------------------------- Grid Row 2 ---------------------------------------------- */}
 			<div id={"viz-area"}>
 				<RenderView frame={frame} markerData={markerFileData} forceData={forceFileData}
-					selectedMarkers={selectedMarkers} updateSelectedMarkers={setSelectedMarkers}
+					selectedMarkers={selectedMarkers} setSelectedMarkers={setSelectedMarkers}
 				/>
 			</div>
 			<div id={"popup-area"}><ErrorPopup error={error} /></div>
