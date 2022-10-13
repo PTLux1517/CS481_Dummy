@@ -11,7 +11,7 @@ import useStateRef from "./useStateRef";
 
 import "./App.scss";
 
-const MILLI_PER = 1000;
+const MILLIS_PER_SEC = 1000;
 
 
 export default function App() {
@@ -35,52 +35,54 @@ export default function App() {
 
 	/* Parse provided markerFile into markerFileData */
 	useEffect(() => {
-		/* Only async parse call from current render should set markerFileData */
-		let staleRequest = false;
+		/* Only async parse call using the most recent file state should set markerFileData */
+		let fileHasNotChanged = true;
 		/* Call parseMarkerFileData inside anonymous wrapper function to handle returned Promise or Error */
 		if (markerFile) (async () => {
 			try {
 				const data = await parseMarkerFileData(markerFile);
-				if (!staleRequest) {
+				if (fileHasNotChanged) {
 					setError(null);
 					setMarkerParsingError(false);
 					setMarkerFileData(data);
 				}
 			}
 			catch (err) {
-				if (!staleRequest && err instanceof Error) {
+				if (fileHasNotChanged && err instanceof Error) {
 					setError(err);
 					setMarkerParsingError(true);
 				}
 			}
 		})();
-		/* Clean-up function for cases where new render is triggered while this is still processing */
-		return () => {staleRequest = true};
+		/* Clean-up function called if there is a new file state while parsing is still in progress.
+		 * Effectively abandons stale results. */
+		return () => {fileHasNotChanged = false};
 	}, [markerFile]);
 
 	/* Parse provided forceFile into forceFileData */
 	useEffect(() => {
-		/* Only async parse call from current render should set forceFileData */
-		let staleRequest = false;
+		/* Only async parse call using the most recent file state should set forceFileData */
+		let fileHasNotChanged = true;
 		/* Call parseForceFileData inside anonymous wrapper function to handle returned Promise or Error */
 		if (forceFile) (async () => {
 			try {
 				const data = await parseForceFileData(forceFile);
-				if (!staleRequest) {
+				if (fileHasNotChanged) {
 					setError(null);
 					setForceParsingError(false);
 					setForceFileData(data);
 				}
 			}
 			catch (err) {
-				if (!staleRequest && err instanceof Error) {
+				if (fileHasNotChanged && err instanceof Error) {
 					setError(err);
 					setForceParsingError(true);
 				}
 			}
 		})();
-		/* Clean-up function if new render is triggered while this is still processing */
-		return () => {staleRequest = true};
+		/* Clean-up function called if there is a new file state while parsing is still in progress.
+		 * Effectively abandons stale results. */
+		return () => {fileHasNotChanged = false};
 	}, [forceFile]);
 
 	// --------------------------------------- Animation & Animation Control Data --------------------------------------
@@ -101,41 +103,50 @@ export default function App() {
 	const [playing, setPlaying] = useState(false);
 	const [loopPlayback, setLoopPlayback] = useState(true);
 
-	const interFrameTimeRef = useRef(0);
-	const lastTimeRef = useRef<DOMHighResTimeStamp|null>(null);
-
+	/* Handle on most recent animation loop, so it may be cancelled */
 	const animationRef = useRef<number>();
 
-	const timeStep = useMemo(() => {
+	/* Time of previous animation loop iteration (most recent render).
+	 * For finding elapsed time between loops to determine which marker frame to render next. */
+	const lastRepaintTimeRef = useRef<DOMHighResTimeStamp|null>(null);
+
+	/* The cumulative elapsed time that has not yet been animated.
+	 * Decremented by timeStepMillis for every marker frame increment. */
+	const interFrameTimeRef = useRef(0);
+
+	/* The time for one marker frame in ms */
+	const timeStepMillis = useMemo(() => {
 		if (markerFileData.frames.length<2) return null;
-		return markerFileData.frames[1].time * MILLI_PER;
+		return markerFileData.frames[1].time * MILLIS_PER_SEC; //convert from secs to millis
 	}, [markerFileData]);
 
+	/* Tail recursive loop, called once per next available browser repaint (at rate of user's display's refresh rate),
+	 * that handles updating the marker/force frame number (to drive the animation) by the correct amount according to
+	 * the time elapsed between repaints. This allows the animation to play at 1x speed. */
 	const animationLoop = useCallback((currentTime: DOMHighResTimeStamp) => {
 		/* If file has not been parsed for the time step, there isn't enough info to know how to animate */
-		if (!timeStep) return;
+		if (!timeStepMillis) return;
 		/* When paused, pretend no time has elapsed */
-		const elapsedTime = (lastTimeRef.current!==null) ? currentTime-lastTimeRef.current : 0;
+		const elapsedTime = (lastRepaintTimeRef.current!==null) ? currentTime-lastRepaintTimeRef.current : 0;
 		/* When playing, before next repaint, increment frame by the correct amount for the elapsed time since last paint */
-		for (interFrameTimeRef.current += elapsedTime; interFrameTimeRef.current > timeStep; interFrameTimeRef.current -= timeStep) {
+		for (interFrameTimeRef.current += elapsedTime; interFrameTimeRef.current > timeStepMillis; interFrameTimeRef.current -= timeStepMillis) {
 			setFrame(current => {
 				if (current+1<=frameCropEnd) return current+1; //next frame is in range, proceed
 				else if (loopPlayback) return frameCropStart; //not in range: wrap around to start if looping
 				else {setPlaying(false); return current;} //not in range: stop playing on final frame if not looping
 			});
 		}
-		/* Loop forever with tail recursion. Each iteration will recalculate new current marker frame
-		 * once per next available browser repaint (at rate of user's display's refresh rate) */
+		/* While playing, loop forever with tail recursion */
 		if (playing) {
-			lastTimeRef.current = currentTime; //store time for getting elapsed time in next loop
-			animationRef.current = requestAnimationFrame(animationLoop);
+			lastRepaintTimeRef.current = currentTime; //store time for getting elapsed time in next loop
+			animationRef.current = requestAnimationFrame(animationLoop); //get handle of new loop
 		}
-	}, [playing, loopPlayback, timeStep, frameCropStart, frameCropEnd]);
+	}, [playing, loopPlayback, timeStepMillis, frameCropStart, frameCropEnd]);
 
-	/* Activate animation loop on play, quasi-deactivate on pause */
+	/* Activate animation loop on play, deactivate on pause */
 	useEffect(() => {
 		if (playing) animationRef.current = requestAnimationFrame(animationLoop); //enter new animation loop
-		else lastTimeRef.current = null; //clear time on pause so animation won't skip ahead on next play
+		else lastRepaintTimeRef.current = null; //clear time on pause so animation won't skip ahead on next play
 		return () => cancelAnimationFrame(animationRef.current!); //escape old animation loop callback when play/pause state changes
 	}, [animationLoop, playing]);
 
