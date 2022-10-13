@@ -106,19 +106,19 @@ export default function App() {
 	/* Handle on most recent animation loop, so it may be cancelled */
 	const animationRef = useRef<number>();
 
+	/* The time for one marker/force frame in ms */
+	const timeStepMillis = useMemo(() => {
+		if (markerFileData.frames.length<2) return null;
+		return markerFileData.frames[1].time * MILLIS_PER_SEC; //convert from secs to millis
+	}, [markerFileData]);
+
 	/* Time of previous animation loop iteration (most recent render).
-	 * For finding elapsed time between loops to determine which marker frame to render next. */
+	 * For finding elapsed time between loops to determine which marker/force frame to render next. */
 	const lastRepaintTimeRef = useRef<DOMHighResTimeStamp|null>(null);
 
 	/* The cumulative elapsed time that has not yet been animated.
 	 * Decremented by timeStepMillis for every marker frame increment. */
 	const interFrameTimeRef = useRef(0);
-
-	/* The time for one marker frame in ms */
-	const timeStepMillis = useMemo(() => {
-		if (markerFileData.frames.length<2) return null;
-		return markerFileData.frames[1].time * MILLIS_PER_SEC; //convert from secs to millis
-	}, [markerFileData]);
 
 	/* Tail recursive loop, called once per next available browser repaint (at rate of user's display's refresh rate),
 	 * that handles updating the marker/force frame number (to drive the animation) by the correct amount according to
@@ -161,6 +161,7 @@ export default function App() {
 
 	// ---------------------------------------------------- Metadata ---------------------------------------------------
 
+	/* Array of the indices of the currently selected markers */
 	const [selectedMarkers, setSelectedMarkers] = useState<number[]>([]);
 
 	// ---------------------------------------------------- Controls ---------------------------------------------------
