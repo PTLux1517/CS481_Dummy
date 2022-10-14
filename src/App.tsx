@@ -27,8 +27,8 @@ export default function App() {
 	const [forceFileData, setForceFileData] = useState<ForceFileData>({frames: []});
 
 	/* Flags for clearing file name if parsing error is encountered */
-	const [markerParsingError, setMarkerParsingError] = useState<boolean>(false);
-	const [forceParsingError, setForceParsingError] = useState<boolean>(false);
+	const [markerParsingError, setMarkerParsingError] = useState(false);
+	const [forceParsingError, setForceParsingError] = useState(false);
 
 	/* Most recent error, for displaying in error popup */
 	const [error, setError] = useState<Error|null>(null);
