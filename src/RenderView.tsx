@@ -30,6 +30,8 @@ const MARKER_COLOR_DEFAULT = new THREE.Color("white");
 const MARKER_COLOR_SELECTED = new THREE.Color("yellow");
 
 const FORCE_VEC_SCALE_FACTOR = 0.0005;
+const FORCE_VEC_HEAD_LENGTH = 0.05;
+const FORCE_VEC_HEAD_WIDTH = 0.025;
 
 const RENDER_WIDTH = 800;
 const RENDER_HEIGHT = 450;
@@ -113,6 +115,8 @@ export default function RenderView(props: Props) {
 	const [forceVectors] = useState(() => {
 		const vec1 = new THREE.ArrowHelper();
 		const vec2 = new THREE.ArrowHelper();
+		vec1.setColor(0xFF0000);
+		vec2.setColor(0xFF0000);
 		vec1.visible = false;
 		vec2.visible = false;
 		return [vec1, vec2];
@@ -136,20 +140,19 @@ export default function RenderView(props: Props) {
 		/* Perform raycast */
 		raycaster.setFromCamera(coords, camera);
 		const hitList = raycaster.intersectObjects(markerMeshes, true);
+		const hit: number|undefined = hitList[0]?.object.userData.index; //get idx of the closest mesh to the camera, if present
 		/* Update selected markers list with result  */
-		props.setSelectedMarkers.call(undefined, currentList => {
-			/* Hit */
-			if (hitList.length>0) {
-				/* Get index (into markerMeshes array) of the intersected marker closest to the camera (hitList[0]) */
-				const hit = hitList[0].object.userData.index as number;
-				/* Multi-select: add or remove single marker from existing selection array */
-				if (multiSelect) return !currentList.includes(hit) ? [...currentList,hit] : currentList.filter(keep => keep!==hit);
-				/* Single-select: narrow selection array to the single selected marker */
-				else return [hit];
-			}
-			/* Miss: remove all markers from selection array (only if not trying to multi-select)  */
-			else return !multiSelect ? [] : currentList;
-		});
+		props.setSelectedMarkers.call(undefined, currentList =>
+			hit||hit===0?
+				multiSelect?
+					currentList.includes(hit)?
+						currentList.filter(keep=>keep!==hit)
+						:[...currentList,hit]
+					:[hit]
+				:multiSelect?
+					currentList
+					:[]
+		);
 	}, [raycaster, markerMeshes, props.setSelectedMarkers, camera]);
 
 	/* Color marker meshes according to selection status */
@@ -169,9 +172,9 @@ export default function RenderView(props: Props) {
 				return;
 			}
 			/* Set position of 3D mesh to marker's position in this frame */
-			mesh.position.x = -pos.x; //COBR x-axis is inverted with respect to THREE's
-			mesh.position.y = pos.z; //COBR z-axis is THREE's y-axis (up direction)
-			mesh.position.z = pos.y; //COBR y-axis is THREE's z-axis (forward direction)
+			mesh.position.x = -pos.x; //Vicon x-axis is inverted with respect to THREE's
+			mesh.position.y = pos.z; //Vicon z-axis is THREE's y-axis
+			mesh.position.z = pos.y; //Vicon y-axis is THREE's z-axis
 			mesh.visible = true; //show markers with valid data
 		});
 	}, [markerMeshes, props.markerData, props.frame]);
@@ -191,7 +194,7 @@ export default function RenderView(props: Props) {
 			vec.position.y = pos.y; //y-axis is the same
 			vec.position.z = pos.x; //OpenSim's x-axis is THREE's z-axis
 			const magnitude = FORCE_VEC_SCALE_FACTOR * Math.sqrt((comps.x**2) + (comps.y**2) + (comps.z**2));
-			vec.setLength(magnitude);
+			vec.setLength(magnitude,FORCE_VEC_HEAD_LENGTH,FORCE_VEC_HEAD_WIDTH);
 			vec.setDirection(new THREE.Vector3(-comps.z,comps.y,comps.x).normalize());
 			vec.visible = true; //show forces with valid data
 		})
