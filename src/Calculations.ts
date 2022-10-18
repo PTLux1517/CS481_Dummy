@@ -1,8 +1,8 @@
 import { Point3D } from './DataTypes';
 
 
-/* Compute the angle between the first three Point3Ds in the provided Array,
- * in degrees rounded to the nearest tenth, with index 0 as theta. */
+/* Compute the angle between the first three Point3Ds in the provided Array
+ * in degrees, with index 0 as theta. */
 export function computeAngle(points: Array<Point3D|null>): number {
 
     if (points.length < 3)
@@ -45,5 +45,5 @@ export function computeAngle(points: Array<Point3D|null>): number {
 
     const theta = Math.acos(cosTheta) * 180/Math.PI; //convert to degrees
 
-    return Math.round(10*theta) / 10; //round to the nearest tenth
+    return theta;
 }
