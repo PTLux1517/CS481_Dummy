@@ -24,6 +24,10 @@ $sdpLinkColor: #D64309;
    font-size: 5pt;
 }
 
+body {
+   margin: 0;
+}
+
 html {
    background-color: $BG_Color;
 }
@@ -32,19 +36,19 @@ html {
 #app-grid {
    & > * {
       z-index: 1;
-      //background-color: red;
    }
    z-index: 1;
    //position: relative; //needed for background z-index, but breaks marker selection precision
-   width: 960px;
-   height: 530px;
+   width: calc(100vw - 20px); //was 960px
+   height: calc(100vh - 125px); //was 530px
+   box-sizing: border-box;
    display: grid;
    grid-template-rows: 22px auto 40.5px 14px; //viz-area, output-area may resize in height (once implemented)
    grid-template-columns: auto 100px 155px; //file-area, viz-area, timeline-track-area may resize in width (once implemented)
-   padding: 5px;
    gap: 5px;
+   padding: 5px;
+   margin: 10px;
    background-image: $BG_Gradient;
-   //background-color: #004444;
    border-radius: 8px;
    box-shadow: black 0 0 8px;
    // ----------------------------------------- Grid Row 1 -----------------------------------------
@@ -88,6 +92,10 @@ html {
       grid-row: 2;
       grid-column: 1/3;
       background-color: $vizAreaBGColor;
+      overflow-y: hidden;
+      > div {
+         height: 100%;
+      }
    }
    #popup-area {
       z-index: 2;
@@ -182,7 +190,6 @@ html {
       grid-column: 1/3;
       position: relative;
       top: -7px;
-      //background-color: red;
       #play-button-loop-checkbox-label {
          color: white;
          position: relative;
@@ -199,43 +206,16 @@ html {
 
 // -------------------------------------- Beneath App grid --------------------------------------
 #sdp-logo-area {
-   width: 960px;
-   margin-top: calc(100vh - 660px);
+   width: 100vw; //was 960px
    #sdp-flex {
       display: flex;
       flex-direction: row;
-      //align-items: center;
       justify-content: center;
-      //align-items: center;
-      //border-radius: 10px;
-      //background-color: black;
-      //width: 433.5px;
-      //box-shadow: black 0px 0px 15px;
-      //height: 150px;
       #sdp-logo {
-         //position: relative;
-         height: 91.5px;
-         //width: 213.5px;
-         //cursor: pointer;
+         height: 91.5px; //width: 213.5px;
          border-radius: 10px 0px 0px 10px;
-         //animation: {
-         //   name: logoSlideOver;
-         //   duration: 3s;
-         //}
-         //@keyframes logoSlideOver {
-         //   0% {
-         //
-         //   }
-         //   50% {
-         //
-         //   }
-         //   100% {
-         //
-         //   }
-         //}
       }
       #sdp-info {
-         //position: relative;
          padding: 10px;
          display: flex;
          flex-direction: column;
@@ -245,34 +225,16 @@ html {
          background-color: $sdpInfoBGColor;
          color: $sdpInfoTextColor;
          white-space: pre-line;
-         //visibility: collapse;
          border-radius: 0px 10px 10px 0px;
-
          a {
             text-decoration: none;
             color: $sdpLinkColor;
             font-weight: bold;
             font-size: 4pt;
          }
-         //animation: {
-         //   name: infoSlideOut;
-         //   duration: 3s;
-         //}
-
       }
    }
 }
-
-//@keyframes infoSlideOut {
-//   0% {
-//      from {left: 100px;}
-//      to {left: 50px;}
-//   }
-//   100% {
-//      from {left: 50px;}
-//      to {left: 0px;}
-//   }
-//}
 
 .file-upload-button {
    background-color: $fileUploadButtonBGColor;
