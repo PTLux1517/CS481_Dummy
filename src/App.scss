@@ -1,12 +1,18 @@
 @import "@fontsource/goldman/latin.css";
 
 /* Colors */
-$BG_Color: #181910;
-$BG_Gradient: linear-gradient(45deg,#002446,#3c78d8,#70c7e4,#96d358,#e4ff66);
+$BG_Color: #181810;
+//$BG_Gradient: linear-gradient(45deg,#002446,#3c78d8,#70c7e4,#96d358,#e4ff66); //orig
+$BG_Gradient: linear-gradient(45deg,#002446, #335b8f, #53999b, #6e8f4a,#bbbb44); //muted
+//$BG_Gradient: linear-gradient(19deg, #21D4FD, #B721FF);
+//$BG_Gradient: linear-gradient(0deg, #08AEEA, #2AF598);
+//$BG_Gradient: linear-gradient(132deg, #F4D03F, #16A085);
+//$BG_Gradient: linear-gradient(45deg, #2c2823, #655735, #d2ad3b); //muted brown-gold
 $fileUploadButtonBGColor: #90c55b;
+$fileUploadButtonShadowColor: #537531;
 $fileChosenNameColor: white;
-$outputAreaTitleColor: #666666;
-$outputAreaBGColor: #4d4d4d9d;
+$outputAreaTitleColor: #666a6a;
+$outputAreaBGColor: rgba(100, 105, 105, 0.62);
 $vizAreaBGColor: #222222;
 $errorPopupTextColor: #aa0000;
 $errorPopupBGColor: #202020cc;
@@ -14,7 +20,7 @@ $playButtonBGColor: #6aa84f;
 $playButtonColor: green;
 $timelineTrackBGColor: #545d5d; //#4d4d4d //#333330
 $timelineTrackThumbColor: yellow; //white
-$timelineCellLabelColor: yellow;
+$timelineCellLabelColor: #ada82c;
 $sdpInfoBGColor: #0033A0;
 $sdpInfoTextColor: white;
 $sdpLinkColor: #D64309;
@@ -22,6 +28,7 @@ $sdpLinkColor: #D64309;
 * {
    font-family: 'Goldman', sans-serif;
    font-size: 5pt;
+   //background-color: red;
 }
 
 body {
@@ -29,7 +36,18 @@ body {
 }
 
 html {
+   height: 100vh;
    background-color: $BG_Color;
+   //background-image: $BG_Gradient;
+   //background: linear-gradient(to bottom, #323232 0%, #3F3F3F 40%, #1C1C1C 150%), linear-gradient(to top, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.25) 200%);
+   //background-blend-mode: multiply;
+   background-image: linear-gradient(to bottom, #30cfd0 0%, #330867 100%);
+   //background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   //background-image: linear-gradient(-225deg, #FF3CAC 0%, #562B7C 52%, #2B86C5 100%);
+   //background-image: linear-gradient(-45deg, #231557 0%, #44107A 29%, #FF1361 67%, #FFF800 100%);
+   //background-image: linear-gradient(-225deg, #473B7B 0%, #3584A7 51%, #30D2BE 100%);
+   //background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+   //background-image: linear-gradient(to top, #3f51b1 0%, #5a55ae 13%, #7b5fac 25%, #8f6aae 38%, #a86aa4 50%, #cc6b8e 62%, #f18271 75%, #f3a469 87%, #f7c978 100%);
 }
 
 /* Styles in the grid are organized top->bottom, left->right */
@@ -38,17 +56,32 @@ html {
       z-index: 1;
    }
    z-index: 1;
-   //position: relative; //needed for background z-index, but breaks marker selection precision
    width: calc(100vw - 20px); //was 960px
    height: calc(100vh - 125px); //was 530px
    box-sizing: border-box;
    display: grid;
-   grid-template-rows: 22px auto 40.5px 14px; //viz-area, output-area may resize in height (once implemented)
-   grid-template-columns: auto 100px 155px; //file-area, viz-area, timeline-track-area may resize in width (once implemented)
+   grid-template-rows: 22px auto 40.5px 14px; //responsive height for: viz-area, output-area
+   grid-template-columns: auto 100px 155px; //responsive width for: file-area, viz-area, timeline-track-area
    gap: 5px;
    padding: 5px;
    margin: 10px;
-   background-image: $BG_Gradient;
+   //background-image: $BG_Gradient;
+   //background-image: linear-gradient(-225deg, #FF3CAC 0%, #562B7C 52%, #2B86C5 100%);
+   //background-image: linear-gradient(-225deg, #231557 0%, #44107A 29%, #FF1361 67%, #FFF800 100%);
+   //background-image: linear-gradient(-225deg, #473B7B 0%, #3584A7 51%, #30D2BE 100%);
+   //background-image: linear-gradient(to right, #243949 0%, #517fa4 100%);
+   //background-image: linear-gradient(to top, #3f51b1 0%, #5a55ae 13%, #7b5fac 25%, #8f6aae 38%, #a86aa4 50%, #cc6b8e 62%, #f18271 75%, #f3a469 87%, #f7c978 100%);
+
+   background: linear-gradient(to bottom, #323232 0%, #3F3F3F 40%, #1C1C1C 150%), linear-gradient(to top, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.25) 200%);
+   background-blend-mode: multiply;
+
+   //background: linear-gradient(to bottom, #323232 0%, #3F3F3F 40%, #1C1C1C 150%), linear-gradient(to top, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.25) 200%);
+   //background-blend-mode: multiply;
+
+   //background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.15) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.40) 120%) #989898;
+   //background-blend-mode: multiply,multiply;
+
+   //background-color: #36332f;
    border-radius: 8px;
    box-shadow: black 0 0 8px;
    // ----------------------------------------- Grid Row 1 -----------------------------------------
@@ -74,6 +107,7 @@ html {
       grid-row: 1;
       grid-column: 2;
       text-align: right;
+      color: #111111;
       font-size: 18pt;
       line-height: 26pt;
       font-weight: 900;
@@ -109,8 +143,7 @@ html {
          overflow: scroll;
          color: $errorPopupTextColor;
          background-color: $errorPopupBGColor;
-         width: 770px;
-         height: 420px;
+         height: calc(100vh - 256px);
          font-family: 'monospace','sans-serif';
          font-size: 9pt;
          cursor: text;
@@ -120,9 +153,16 @@ html {
       grid-row: 2;
       grid-column: 3;
       background-color: $outputAreaBGColor;
-      white-space: pre-line;
+      box-shadow: 0 0 8px #303a3a inset, 0 0 5px #303a3a;
       padding: 5px;
-      font-size: 9pt;
+      #selection-info-view {
+         & > * {
+            font-size: 9pt;
+         }
+         & :first-child {
+            margin-top: 0;
+         }
+      }
    }
    // ----------------------------------------- Grid Row 3 -----------------------------------------
    #timeline-track-area {
@@ -136,9 +176,11 @@ html {
          #play-button {
             width: 36px;
             height: 36px;
+            padding: 8px;
             margin-right: 5px;
             border: none;
             background-color: $playButtonBGColor;
+            box-shadow: 0 0 7px $fileUploadButtonShadowColor inset, 0 0 5px #303a3a;
             display: grid;
             justify-content: center;
             align-items: center;
@@ -156,11 +198,14 @@ html {
                height: 36px;
                cursor: pointer;
                background: $timelineTrackBGColor;
+               box-shadow: 0 0 8px #303a3a inset, 0 0 5px #303a3a;
             }
             &::-webkit-slider-thumb {
                height: 36px;
-               width: 2px;
+               width: 3px;
+               border-radius: 1px;
                background: $timelineTrackThumbColor;
+               box-shadow: 0 0 2px #303a3a inset, 0 0 2px #303a3a;
                cursor: pointer;
                -webkit-appearance: none;
             }
@@ -241,7 +286,10 @@ html {
    width: 124px;
    height: 14px;
    font-weight: bold;
+   border: solid 1px $fileUploadButtonShadowColor;
+   ////border: none;
    border-radius: 5px;
+   box-shadow: 0 0 4px $fileUploadButtonShadowColor inset;
    cursor: pointer;
 }
 
@@ -251,20 +299,24 @@ html {
 }
 
 .timeline-cell {
-   width: 34px;
-   height: 11px;
-   margin: -2px;
-   padding: 0px 2px;
+   width: 34.5px;
+   height: 17.75px;
+   margin: -2.5px;
+   padding: 0px 3px;
    text-align: left;
+   border: solid black 1px;
    &:focus {
       outline: none;
    }
    &.label {
       color: $timelineCellLabelColor;
+      border: none;
    }
 }
 
 input:disabled {
+   color: black;
+   background-color: gray;
    -moz-appearance: textfield;
    &::-webkit-inner-spin-button {
       -webkit-appearance: none;
