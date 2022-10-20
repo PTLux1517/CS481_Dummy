@@ -21,7 +21,7 @@ $sdpLinkColor: #D64309;
 
 * {
    font-family: 'Goldman', sans-serif;
-   font-size: 5pt;
+   font-size: 1em;
 }
 
 body {
@@ -36,20 +36,20 @@ html {
 #app-grid {
    & > * {
       z-index: 1;
+      //background-color: red;
    }
    z-index: 1;
-   //position: relative; //needed for background z-index, but breaks marker selection precision
-   width: calc(100vw - 20px); //was 960px
-   height: calc(100vh - 125px); //was 530px
+   width: 99vw; //was 960px
+   height: 92vh; //was 530px
    box-sizing: border-box;
    display: grid;
-   grid-template-rows: 22px auto 40.5px 14px; //viz-area, output-area may resize in height (once implemented)
-   grid-template-columns: auto 100px 155px; //file-area, viz-area, timeline-track-area may resize in width (once implemented)
-   gap: 5px;
-   padding: 5px;
-   margin: 10px;
+   grid-template-rows: 2.5vh 82.2vh 4vh 1vh; //responsive height for: viz-area, output-area
+   grid-template-columns: calc(66vw - 3.4vmin) 16vw 18vw; //responsive width for: file-area, viz-area, timeline-track-area
+   gap: 0.6vmin;
+   padding: 0.6vmin;
+   margin: 0.9vmin;
    background-image: $BG_Gradient;
-   border-radius: 8px;
+   border-radius: 0.9vmin;
    box-shadow: black 0 0 8px;
    // ----------------------------------------- Grid Row 1 -----------------------------------------
    #file-area-flex {
@@ -74,17 +74,17 @@ html {
       grid-row: 1;
       grid-column: 2;
       text-align: right;
-      font-size: 18pt;
-      line-height: 26pt;
+      font-size: 4.5em;
+      line-height: 1.3em;
       font-weight: 900;
    }
    #output-area-title {
       grid-row: 1;
       grid-column: 3;
       text-align: center;
-      font-size: 8pt;
+      font-size: 1.8em;
       font-weight: bold;
-      line-height: 30pt;
+      line-height: 4.2em;
       color: $outputAreaTitleColor;
    }
    // ----------------------------------------- Grid Row 2 -----------------------------------------
@@ -92,8 +92,9 @@ html {
       grid-row: 2;
       grid-column: 1/3;
       background-color: $vizAreaBGColor;
-      overflow-y: hidden;
+      //overflow: hidden;
       > div {
+         width: 100%;
          height: 100%;
       }
    }
@@ -109,10 +110,9 @@ html {
          overflow: scroll;
          color: $errorPopupTextColor;
          background-color: $errorPopupBGColor;
-         width: 770px;
-         height: 420px;
+         height: 80.9vh;
          font-family: 'monospace','sans-serif';
-         font-size: 9pt;
+         font-size: 1.5em;
          cursor: text;
       }
    }
@@ -120,9 +120,15 @@ html {
       grid-row: 2;
       grid-column: 3;
       background-color: $outputAreaBGColor;
-      white-space: pre-line;
       padding: 5px;
-      font-size: 9pt;
+      #selection-info-view {
+         & > * {
+            font-size: 1.7em;
+         }
+         & :first-child {
+            margin-top: 0;
+         }
+      }
    }
    // ----------------------------------------- Grid Row 3 -----------------------------------------
    #timeline-track-area {
@@ -134,44 +140,46 @@ html {
          display: flex;
          align-items: center;
          #play-button {
-            width: 36px;
-            height: 36px;
-            margin-right: 5px;
+            width: 4.5vw;
+            height: 4vh;
+            padding: 1vmin;
+            margin-right: 0.6vw;
             border: none;
             background-color: $playButtonBGColor;
             display: grid;
             justify-content: center;
             align-items: center;
-            border-radius: 3px;
+            border-radius: 0.7vmin;
             cursor: pointer;
             > svg {
                width: 100%;
+               height: 100%;
                color: $playButtonColor;
             }
          }
          #timeline-track {
-            width: calc(100% - 45px);
+            width: calc(100% - 4.5vw + 0.6vw);
             -webkit-appearance: none;
             &::-webkit-slider-runnable-track {
-               height: 36px;
+               height: 3.85vh;
                cursor: pointer;
                background: $timelineTrackBGColor;
             }
             &::-webkit-slider-thumb {
-               height: 36px;
-               width: 2px;
+               height: 3.85vh;
+               width: 0.2vw;
                background: $timelineTrackThumbColor;
                cursor: pointer;
                -webkit-appearance: none;
             }
             &::-moz-range-track {
-               height: 36px;
+               height: 3.85vh;
                cursor: pointer;
                background: $timelineTrackBGColor;
             }
             &::-moz-range-thumb {
-               height: 36px;
-               width: 2px;
+               height: 3.85vh;
+               width: 0.2vw;
                background: $timelineTrackThumbColor;
                cursor: pointer;
                -webkit-appearance: none;
@@ -179,7 +187,7 @@ html {
          }
       }
    }
-   #timeline-manual-area {
+   #timeline-manual-area { //see .timeline-cell
       grid-row: 3;
       grid-column: 3;
       text-align: center;
@@ -189,17 +197,20 @@ html {
       grid-row: 4;
       grid-column: 1/3;
       position: relative;
-      top: -7px;
+      top: -0.5vh;
       #play-button-loop-checkbox-label {
          color: white;
+         font-size: 1.3em;
+         margin: 0 0.3vw;
          position: relative;
-         bottom: 8px;
-         left: 3px;
+         bottom: 0.2vh;
+         //left: 0.3vw;
       }
       #play-button-loop-checkbox {
-         width: 8px;
+         width: 0.8vw;
+         height: 0.8vh;
          position: relative;
-         bottom: -5px;
+         bottom: -0.2vh;
       }
    }
 }
@@ -238,23 +249,25 @@ html {
 
 .file-upload-button {
    background-color: $fileUploadButtonBGColor;
-   width: 124px;
-   height: 14px;
+   width: 17vw;
+   height: 1.52vh;
+   font-size: 1.1em;
    font-weight: bold;
-   border-radius: 5px;
+   border-radius: 0.4vmin;
    cursor: pointer;
 }
 
 .file-chosen-name {
    color: $fileChosenNameColor;
-   padding-left: 5px;
+   font-size: 1.1em;
+   padding-left: 0.6vw;
 }
 
 .timeline-cell {
-   width: 34px;
-   height: 11px;
+   width: 4.25vw;
+   height: 1.4vh;
    margin: -2px;
-   padding: 0px 2px;
+   padding: 0 0.25vw;
    text-align: left;
    &:focus {
       outline: none;
