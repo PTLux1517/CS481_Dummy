@@ -13,6 +13,8 @@ const THREE_X_AXIS = new THREE.Vector3(1,0,0);
 const THREE_Y_AXIS = new THREE.Vector3(0,1,0);
 const THREE_Z_AXIS = new THREE.Vector3(0,0,1);
 
+const CAM_DIR_VEC = new THREE.Vector3();
+
 const MARKER_COLOR_DEFAULT = new THREE.Color("white");
 const MARKER_COLOR_SELECTED = new THREE.Color(0x00FF00);
 
@@ -207,16 +209,15 @@ export default function RenderView(
 
     /* Position axis helper relative to current camera position/rotation */
     useEffect(() => {
-        const camDirVec = new THREE.Vector3();
-        const camDirPerpVec = THREE_Y_AXIS.clone(); //will be reassigned by cross product of yAxis and camDirVec
+        const camDirPerpVec = THREE_Y_AXIS.clone(); //will be reassigned by cross product of yAxis and CAM_DIR_VEC
         const dist = 2/aspectRatio;
-        camera.getWorldDirection(camDirVec);
-        camDirPerpVec.cross(camDirVec).normalize(); //gets axis perpendicular to camera's current direction
-        camDirVec.applyAxisAngle(camDirPerpVec, Math.PI/6); //put axis helper to the bottom of current camera view
-        camDirVec.multiplyScalar(dist);
-        camDirVec.add(camera.position);
-        camDirVec.add(camDirPerpVec); //put axis helper to the left of current camera view
-        axisHelper.position.set(camDirVec.x, camDirVec.y, camDirVec.z);
+        camera.getWorldDirection(CAM_DIR_VEC);
+        camDirPerpVec.cross(CAM_DIR_VEC).normalize(); //gets axis perpendicular to camera's current direction
+        CAM_DIR_VEC.applyAxisAngle(camDirPerpVec, Math.PI/6); //put axis helper to the bottom of current camera view
+        CAM_DIR_VEC.multiplyScalar(dist);
+        CAM_DIR_VEC.add(camera.position);
+        CAM_DIR_VEC.add(camDirPerpVec); //put axis helper to the left of current camera view
+        axisHelper.position.set(CAM_DIR_VEC.x, CAM_DIR_VEC.y, CAM_DIR_VEC.z);
     }, [camPosX, camPosY, camPosZ, camRotX, camRotY, camRotZ, camera, axisHelper, aspectRatio]);
 
     /* Add marker meshes to scene */
@@ -294,11 +295,15 @@ export default function RenderView(
         /* Flight controls (mouse) */
         const mouseWheelHandler = (e: WheelEvent) => {
             const scaleFactor = 4;
+            const move = e.deltaY>0 ? -moveMeters*scaleFactor : moveMeters*scaleFactor;
             e.preventDefault(); //don't scroll page wile mouse is in viz area
-            if (e.deltaY > 0)
-                cameraControls.moveForward(-moveMeters * scaleFactor);
-            else
-                cameraControls.moveForward(moveMeters * scaleFactor);
+            if (e.shiftKey||e.ctrlKey) { //move in direction of camera
+                camera.getWorldDirection(CAM_DIR_VEC);
+                CAM_DIR_VEC.multiplyScalar(move);
+                CAM_DIR_VEC.add(camera.position);
+                camera.position.set(CAM_DIR_VEC.x, CAM_DIR_VEC.y, CAM_DIR_VEC.z);
+            }
+            else cameraControls.moveForward(move) //simply move forward/backward
             setCamPosX(camera.position.x);
             setCamPosY(camera.position.y);
             setCamPosZ(camera.position.z);
