@@ -1,58 +1,57 @@
 import * as React from "react";
-
 import { MarkerFileData } from "../dataTypes";
 import { computeAngle } from "../modules/Calculations";
 
 interface Props {
-	markerData: MarkerFileData;
-	selectedMarkers: number[];
-	frame: number;
+    markerData: MarkerFileData;
+    selectedMarkers: number[];
+    frame: number;
 }
 
-export default function SelectionInfoView(props: Props) {
+export default function SelectionInfoView(
+    {
+        markerData, selectedMarkers, frame
+    }: Props
+) {
+    if(selectedMarkers.length === 0)
+        return <div id={"selection-info-view"}><p>Nothing selected</p></div>;
 
-	if(props.selectedMarkers.length === 0)
-		return <div id={"output-area"}><div id={"selection-info-view"}><p>Nothing selected</p></div></div>;
+    const selectedMarkersMetadata = <>
+        {
+            selectedMarkers.map(idx => {
+                const label = markerData.markers[idx].label;
+                const pos = markerData.frames[frame].positions[idx];
+                return <p key={idx}> {/* idx here is effectively an ID in the loaded data */}
+                    Label: {label}<br />
+                    {
+                        pos === null ?
+                            "Unknown position" :
+                            <>
+                                x: {(pos.x>=0 ? "+" : "") + pos.x}<br />
+                                y: {(pos.y>=0 ? "+" : "") + pos.y}<br />
+                                z: {(pos.z>=0 ? "+" : "") + pos.z}
+                            </>
+                    }
+                </p>;
+            })
+        }
+    </>;
 
-	const selectedMarkersMetadata = <>
-		{
-			props.selectedMarkers.map(idx => {
-				const info = props.markerData.markers[idx];
-				const frameInfo = props.markerData.frames[props.frame].positions[idx];
+    let angleOutput;
+    if (selectedMarkers.length >= 3) {
+        const thetaLabel = markerData.markers[selectedMarkers[0]].label;
+        const first3Pos = selectedMarkers.slice(0,3).map(idx => markerData.frames[frame].positions[idx]);
+        let angle = computeAngle(first3Pos);
+        if (angle!==null) {
+            angle = Math.round(10*angle) / 10; //round to the nearest tenth
+            angleOutput = <p>{thetaLabel} Angle: {angle}°</p>;
+        }
+        else angleOutput = <p>Unknown angle (missing marker)</p>;
+    }
+    else angleOutput = <></>; //no output: not enough selected
 
-				return <p key={idx}> {/* idx here is effectively an ID in the loaded data */}
-					Label: {info.label}<br />
-					{
-						frameInfo === null ?
-							"Unknown position" :
-							<>
-								x: {frameInfo.x}<br />
-								y: {frameInfo.y}<br />
-								z: {frameInfo.z}
-							</>
-					}
-				</p>;
-			})
-		}
-	</>;
-
-	let angleOutput;
-	if (props.selectedMarkers.length >= 3) {
-		const thetaLabel = props.markerData.markers[props.selectedMarkers[0]].label;
-		const first3Pos = props.selectedMarkers.slice(0,3).map(idx => props.markerData.frames[props.frame].positions[idx]);
-		let angle = computeAngle(first3Pos);
-		if (angle!==null) {
-			angle = Math.round(10*angle) / 10; //round to the nearest tenth
-			angleOutput = <p>{thetaLabel} Angle: {angle}°</p>;
-		}
-		else angleOutput = <p>Unknown angle (missing marker)</p>;
-	}
-	else angleOutput = <></>; //no output: not enough selected
-
-	return <div id={"output-area"}>
-		<div id={"selection-info-view"}>
-			{angleOutput}
-			{selectedMarkersMetadata}
-		</div>
-	</div>;
+    return <div id={"selection-info-view"}>
+        {angleOutput}
+        {selectedMarkersMetadata}
+    </div>;
 }
