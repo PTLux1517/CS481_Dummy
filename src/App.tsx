@@ -56,7 +56,7 @@ export default function App() {
             }
             catch (err) {
                 if (fileHasNotChanged && err instanceof Error) {
-                    setError(err);
+                    switchToPopup(err);
                     setMarkerParsingError(true);
                 }
             }
@@ -82,7 +82,7 @@ export default function App() {
             }
             catch (err) {
                 if (fileHasNotChanged && err instanceof Error) {
-                    setError(err);
+                    switchToPopup(err);
                     setForceParsingError(true);
                 }
             }
@@ -177,6 +177,30 @@ export default function App() {
     const [controlsHelpImgNum, setControlsHelpImgNum] = useState(0);
     const [sdpInfo, setSdpInfo] = useState(false);
 
+    const switchToPopup = useCallback((p: string|Error) => {
+        if (p instanceof Error) {
+            setError(p);
+            setMenu(false);
+            setSdpInfo(false);
+        }
+        else switch (p) {
+            case "menu":
+                if (!menu) {
+                    setError(null);
+                    setSdpInfo(false);
+                }
+                setMenu(!menu);
+                break;
+            case "sdpInfo":
+                if (!sdpInfo) {
+                    setError(null);
+                    setMenu(false);
+                }
+                setSdpInfo(!sdpInfo);
+                break
+        }
+    }, [menu,sdpInfo,setMenu,setSdpInfo,setError]);
+
     // ---------------------------------------------------- App JSX ----------------------------------------------------
 
     /* Elements/components in the grid are organized top->bottom, left->right */
@@ -188,7 +212,7 @@ export default function App() {
         />
         <div id={"logo-menu-button-div"}>
             <div id={"logo"}>Movilo</div>
-            <button id={"main-menu-button"} onClick={()=>setMenu(!menu)}><MenuIcon /></button>
+            <button id={"main-menu-button"} onClick={()=>switchToPopup("menu")}><MenuIcon /></button>
         </div>
         <div id={"selection-info-title"}>
             Selection Info
@@ -202,7 +226,7 @@ export default function App() {
         />
         <SelectionInfoView markerData={markerFileData} selectedMarkers={selectedMarkers} frame={frame}
         />
-        <img id={"sdp-logo"} src={sdpLogo} alt={"senior design project logo"} onClick={()=>setSdpInfo(!sdpInfo)}
+        <img id={"sdp-logo"} src={sdpLogo} alt={"senior design project logo"} onClick={()=>switchToPopup("sdpInfo")}
         />
         {/* --------------------------------------------- Grid Row 4-5 --------------------------------------------- */}
         <TimelineTrackView frameStart={frameStart} frame={frame} frameRef={frameRef} frameEnd={frameEnd}

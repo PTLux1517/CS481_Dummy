@@ -3,35 +3,38 @@
 /* Colors (hue ref: 0=red, 30=orange, 60=yellow, 120=green, 180=cyan, 240=blue, 270=purple, 300=pink, 360=red) */
 $BG_Gradient: linear-gradient(
                            45deg,
-                           hsl( 225,  75%,  18%)  5%,
-                           hsl( 218,  63%,  50%) 35%,
-                           hsl( 190,  72%,  62%) 50%,
-                           hsl(  90,  59%,  58%) 78%,
-                           hsl(  67,  92%,  66%) 94%
+                           hsl(  38,  16%,  14%) 13%,
+                           hsl(  55,  42%,  38%) 35%,
+                           hsl(  95,  40%,  45%) 65%,
+                           hsl( 140,  35%,  52%) 80%,
+                           hsl( 178,  35%,  42%) 95%
 );
 $BG_Color:                 hsl(  60,  20%,   8%);
 // ---------------- Grid Row 1 ------------------
-$fileUploadButtonBGColor:  hsl(  90,  48%,  56%);
-$fileChosenNameColor:      hsl(   0,   0%, 100%);
-$selectionInfoTitleColor:  hsl(   0,   0%,  40%);
+$topRowButtonBGColor:      hsla(102,  36%,   0% , 0.44);
+$topRowButtonContentColor: hsla(102,   0%,   0% , 0.58);
+$fileChosenNameColor:      hsla(  0,   0%, 100% , 0.75);
+$logoColor:                hsla(  0,   0%,   0% , 0.7);
+$selectionInfoTitleColor:  hsla(  0,   0%,   0% , 0.47);
 // --------------- Grid Rows 2-3 ----------------
 $renderViewBGColor:        hsl(   0,   0%,  13%);
 $errorPopupBGColor:        hsla(  0,   0%,  13% , 0.8);
 $errorPopupTextColor:      hsl(   0, 100%,  33%);
-$menuBGColor:              hsl(   0,   0%, 100%);
-$menuOptionsBGColor:       hsl(  80,  10%,  70%);
-$menuParentOptionColor:    hsl(  30,  90%,  50%);
+$menuBGColor:              hsla(  0,   0%, 100% , 0);
+$menuTitleColor:           hsla(  0,   0%, 100% , 0.68);
+$menuOptionsBGColor:       hsla( 80,  10%,  70% , 0.5);
+$menuParentOptionColor:    hsl(  26,  75%,  44%);
 $menuOptionHoverColor:     hsl( 221,  90%,  30%);
-$sdpInfoBGColor:           hsl( 221, 100%,  31%);
+$sdpInfoBGColor:           hsla(221, 100%,  31% , 0.7);
 $sdpInfoTextColor:         hsl(   0,   0%, 100%);
 $sdpInfoLinkColor:         hsl(  17,  92%,  44%);
 $selectionInfoViewBGColor: hsla(  0,   0%,  30% , 0.62);
 // --------------- Grid Rows 4-5 ----------------
-$playButtonBGColor:        hsl( 102,  36%,  48%);
-$playButtonIconColor:      hsl( 120, 100%,  25%);
-$timelineTrackBGColor:     hsl( 180,   5%,  35%);
+$playButtonBGColor:        hsl( 150,   0%,   5%);
+$playButtonIconColor:      hsl( 102,  60%,   9%);
+$timelineTrackBGColor:     hsl( 150,  10%,  10%);
 $timelineTrackThumbColor:  hsl(  60, 100%,  50%);
-$timelineCellLabelColor:   hsl(  60, 100%,  50%);
+$timelineCellLabelColor:   hsla( 50,  20%,   6% , 0.75);
 $loopLabelColor:           hsl(   0,   0%, 100%);
 
 
@@ -102,7 +105,8 @@ body {
       display: flex;
       flex-direction: column;
       .file-upload-button {
-         background-color: $playButtonBGColor;
+         color: $topRowButtonContentColor;
+         background-color: $topRowButtonBGColor;
          width: 185px;
          height: 15px;
          font-weight: bold;
@@ -111,7 +115,7 @@ body {
          margin-bottom: 2px;
          &:hover {
             cursor: pointer;
-            filter: brightness(85%);
+            filter: invert(12%);
          }
       }
       .file-chosen-name {
@@ -132,10 +136,11 @@ body {
          font-size: 24pt;
          line-height: 34pt;
          font-weight: 900;
+         color: $logoColor;
       }
       #main-menu-button {
-         color: $playButtonIconColor;
-         background-color: $playButtonBGColor;
+         color: $topRowButtonContentColor;
+         background-color: $topRowButtonBGColor;
          width: 36px;
          height: 32px;
          border: none;
@@ -143,7 +148,7 @@ body {
          margin-left: 6px;
          padding: 6px;
          &:hover {
-            filter: brightness(85%);
+            filter: invert(12%);
             cursor: pointer;
          }
       }
@@ -211,12 +216,14 @@ body {
             width: 100%; //maintain width even when no image is displayed
             img {
                width: 100%;
+               filter: opacity(65%);
             }
          }
          #menu-dropdown-container {
             $titleHeight: 20px;
             #menu-title {
                height: $titleHeight;
+               color: $menuTitleColor;
                text-align: center;
                font-size: 14pt;
                font-weight: bold;
@@ -299,9 +306,10 @@ body {
       grid-column: 3;
       width: 100%;
       border-radius: $sharedBorderRadius;
+      filter: brightness(65%) opacity(60%);
       &:hover {
          cursor: pointer;
-         filter: brightness(85%);
+         filter: brightness(78%) opacity(60%);
       }
    } //#sdp-logo
 
@@ -333,7 +341,7 @@ body {
          }
          &:hover {
             cursor: pointer;
-            filter: brightness(85%);
+            filter: invert(5%);
          }
       } //#play-button
 
@@ -422,11 +430,15 @@ body {
          text-align: left;
          border: none;
          border-radius: $sharedBorderRadius;
+         background-color: hsla(0, 0%, 100%, 0.65);
          &.label {
+            background-color: transparent;
             color: $timelineCellLabelColor;
+            font-weight: bold;
          }
       }
       input:disabled { //hide up & down arrows for time cells to allow value to span the entire width
+         background-color: hsla(0, 0%, 100%, 0.25);
          -moz-appearance: textfield;
          &::-webkit-inner-spin-button {
             -webkit-appearance: none;
